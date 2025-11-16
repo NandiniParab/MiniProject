@@ -12,6 +12,7 @@ export default function SignupPage() {
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
   const [error, setError] = useState("")
+  const [locale, setLocale] = useState("")
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
   const { login } = useAuth()
@@ -40,6 +41,7 @@ export default function SignupPage() {
         role: "accountant",
         organizationId: 1,  // Default organization ID
         branchId: 1,        // Default branch ID
+        locale,
       })
       login(res.data.user, res.data.token)
       navigate("/dashboard")
@@ -94,6 +96,17 @@ export default function SignupPage() {
               required
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
               placeholder="your@email.com"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Locale</label>
+            <input
+              type="text"
+              value={locale}
+              onChange={(e) => setLocale(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              placeholder="en-IN"
             />
           </div>
 

@@ -9,6 +9,8 @@ const app = express()
 // Middleware
 app.use(cors())
 app.use(express.json())
+app.use(express.static("pdfs"))
+app.use(express.static("reports"))
 
 app.get("/api/health", (req, res) => {
   console.log("[v0] Health check called")
@@ -24,7 +26,9 @@ import invoiceRoutes from "./routes/invoices.js"
 import paymentRoutes from "./routes/payments.js"
 import expenseRoutes from "./routes/expenses.js"
 import reportRoutes from "./routes/reports.js"
-import branchRoutes from "./routes/branches.js"
+import ocrRoutes from "./routes/ocr.js"
+import pdfRoutes from "./routes/pdf-generation.js"
+import reportGenRoutes from "./routes/report-generation.js"
 
 app.use("/api/auth", authRoutes)
 app.use("/api/organizations", organizationRoutes)
@@ -34,7 +38,9 @@ app.use("/api/invoices", invoiceRoutes)
 app.use("/api/payments", paymentRoutes)
 app.use("/api/expenses", expenseRoutes)
 app.use("/api/reports", reportRoutes)
-app.use("/api/branches", branchRoutes)
+app.use("/api/ocr", ocrRoutes)
+app.use("/api/pdf", pdfRoutes)
+app.use("/api/report-gen", reportGenRoutes)
 
 const PORT = process.env.PORT || 5000
 

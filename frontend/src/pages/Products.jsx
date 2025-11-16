@@ -15,6 +15,7 @@ export default function Products() {
     price: "",
     expected_gst_rate: "",
     stock: "",
+    meta: "",
   })
 
   useEffect(() => {
@@ -45,7 +46,7 @@ export default function Products() {
         expected_gst_rate: Number.parseFloat(formData.expected_gst_rate),
         stock: Number.parseInt(formData.stock),
       })
-      setFormData({ name: "", hsn_sac_code: "", price: "", expected_gst_rate: "", stock: "" })
+      setFormData({ name: "", hsn_sac_code: "", price: "", expected_gst_rate: "", stock: "", meta: "" })
       setShowForm(false)
       fetchProducts()
     } catch (err) {
@@ -83,43 +84,67 @@ export default function Products() {
         {showForm && (
           <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-lg space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input
-                type="text"
-                placeholder="Product Name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-                className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-              <input
-                type="text"
-                placeholder="HSN/SAC Code"
-                value={formData.hsn_sac_code}
-                onChange={(e) => setFormData({ ...formData, hsn_sac_code: e.target.value })}
-                className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-              <input
-                type="number"
-                placeholder="Price"
-                value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                required
-                className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-              <input
-                type="number"
-                placeholder="GST Rate (%)"
-                value={formData.expected_gst_rate}
-                onChange={(e) => setFormData({ ...formData, expected_gst_rate: e.target.value })}
-                className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-              <input
-                type="number"
-                placeholder="Stock"
-                value={formData.stock}
-                onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              />
+              <div>
+                <label htmlFor="product-name" className="block text-sm font-medium mb-1">Product Name</label>
+                <input
+                  id="product-name"
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+              <div>
+                <label htmlFor="product-hsn" className="block text-sm font-medium mb-1">HSN/SAC Code</label>
+                <input
+                  id="product-hsn"
+                  type="text"
+                  value={formData.hsn_sac_code}
+                  onChange={(e) => setFormData({ ...formData, hsn_sac_code: e.target.value })}
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+              <div>
+                <label htmlFor="product-price" className="block text-sm font-medium mb-1">Price</label>
+                <input
+                  id="product-price"
+                  type="number"
+                  value={formData.price}
+                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                  required
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+              <div>
+                <label htmlFor="product-gst" className="block text-sm font-medium mb-1">GST Rate (%)</label>
+                <input
+                  id="product-gst"
+                  type="number"
+                  value={formData.expected_gst_rate}
+                  onChange={(e) => setFormData({ ...formData, expected_gst_rate: e.target.value })}
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+              <div>
+                <label htmlFor="product-stock" className="block text-sm font-medium mb-1">Stock</label>
+                <input
+                  id="product-stock"
+                  type="number"
+                  value={formData.stock}
+                  onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label htmlFor="product-meta" className="block text-sm font-medium mb-1">Meta</label>
+                <textarea
+                  id="product-meta"
+                  value={formData.meta}
+                  onChange={(e) => setFormData({ ...formData, meta: e.target.value })}
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
             </div>
             <div className="flex gap-2">
               <button type="submit" className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">

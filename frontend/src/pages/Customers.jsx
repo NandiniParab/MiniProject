@@ -16,6 +16,7 @@ export default function Customers() {
     gstin: "",
     state_code: "",
     address: "",
+    shipping_address: "",
   })
 
   useEffect(() => {
@@ -41,7 +42,7 @@ export default function Customers() {
     e.preventDefault()
     try {
       await apiClient.post("/customers", formData)
-      setFormData({ name: "", email: "", phone: "", gstin: "", state_code: "", address: "" })
+      setFormData({ name: "", email: "", phone: "", gstin: "", state_code: "", address: "", shipping_address: "" })
       setShowForm(false)
       fetchCustomers()
     } catch (err) {
@@ -79,49 +80,77 @@ export default function Customers() {
         {showForm && (
           <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-lg space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input
-                type="text"
-                placeholder="Name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-                className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-              <input
-                type="email"
-                placeholder="Email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-              <input
-                type="tel"
-                placeholder="Phone"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-              <input
-                type="text"
-                placeholder="GSTIN"
-                value={formData.gstin}
-                onChange={(e) => setFormData({ ...formData, gstin: e.target.value })}
-                className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-              <input
-                type="text"
-                placeholder="State Code"
-                value={formData.state_code}
-                onChange={(e) => setFormData({ ...formData, state_code: e.target.value })}
-                className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-              <input
-                type="text"
-                placeholder="Address"
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              />
+              <div>
+                <label htmlFor="customer-name" className="block text-sm font-medium mb-1">Name</label>
+                <input
+                  id="customer-name"
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+              <div>
+                <label htmlFor="customer-email" className="block text-sm font-medium mb-1">Email</label>
+                <input
+                  id="customer-email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+              <div>
+                <label htmlFor="customer-phone" className="block text-sm font-medium mb-1">Phone</label>
+                <input
+                  id="customer-phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+              <div>
+                <label htmlFor="customer-gstin" className="block text-sm font-medium mb-1">GSTIN</label>
+                <input
+                  id="customer-gstin"
+                  type="text"
+                  value={formData.gstin}
+                  onChange={(e) => setFormData({ ...formData, gstin: e.target.value })}
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+              <div>
+                <label htmlFor="customer-state-code" className="block text-sm font-medium mb-1">State Code</label>
+                <input
+                  id="customer-state-code"
+                  type="text"
+                  value={formData.state_code}
+                  onChange={(e) => setFormData({ ...formData, state_code: e.target.value })}
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+              <div>
+                <label htmlFor="customer-address" className="block text-sm font-medium mb-1">Billing Address</label>
+                <input
+                  id="customer-address"
+                  type="text"
+                  value={formData.address}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label htmlFor="customer-shipping-address" className="block text-sm font-medium mb-1">Shipping Address</label>
+                <input
+                  id="customer-shipping-address"
+                  type="text"
+                  value={formData.shipping_address}
+                  onChange={(e) => setFormData({ ...formData, shipping_address: e.target.value })}
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
             </div>
             <div className="flex gap-2">
               <button type="submit" className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
