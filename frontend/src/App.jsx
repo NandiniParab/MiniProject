@@ -4,11 +4,17 @@ import ProtectedRoute from "./components/ProtectedRoute"
 import LoginPage from "./pages/LoginPage"
 import SignupPage from "./pages/SignupPage"
 import Dashboard from "./pages/Dashboard"
+import OrganizationSetup from "./pages/OrganizationSetup"
 import Customers from "./pages/Customers"
 import Products from "./pages/Products"
 import Invoices from "./pages/Invoices"
 import Expenses from "./pages/Expenses"
+import Payments from "./pages/Payments"
 import Reports from "./pages/Reports"
+import TaxReturns from "./pages/TaxReturns"
+import BackupRestore from "./pages/BackupRestore"
+import Profile from "./pages/Profile"
+import InvoicePreview from "./pages/InvoicePreview"
 
 export default function App() {
   return (
@@ -17,6 +23,14 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route
+            path="/setup"
+            element={
+              <ProtectedRoute>
+                <OrganizationSetup />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/dashboard"
             element={
@@ -58,6 +72,14 @@ export default function App() {
             }
           />
           <Route
+            path="/payments"
+            element={
+              <ProtectedRoute>
+                <Payments />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/reports"
             element={
               <ProtectedRoute>
@@ -65,7 +87,39 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/" element={<Navigate to="/dashboard" />} />
+          <Route
+            path="/tax"
+            element={
+              <ProtectedRoute>
+                <TaxReturns />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings/backup"
+            element={
+              <ProtectedRoute>
+                <BackupRestore />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/invoices/:id/preview"
+            element={
+              <ProtectedRoute>
+                <InvoicePreview />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/" element={<Navigate to="/login" />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

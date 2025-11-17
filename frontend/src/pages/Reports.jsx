@@ -13,6 +13,7 @@ export default function Reports() {
     expenses: [],
   })
   const [loading, setLoading] = useState(true)
+  const [filters, setFilters] = useState({ start: "", end: "", branch: "" })
 
   useEffect(() => {
     const fetchReports = async () => {
@@ -40,6 +41,29 @@ export default function Reports() {
     fetchReports()
   }, [])
 
+  const exportCSV = async (type) => {
+    const params = new URLSearchParams()
+    if (filters.start) params.append("start", filters.start)
+    if (filters.end) params.append("end", filters.end)
+    if (filters.branch) params.append("branch", filters.branch)
+    const url = `/reports/export/${type}?${params.toString()}`
+    const resp = await apiClient.get(url, { responseType: "blob" })
+    const blobUrl = window.URL.createObjectURL(new Blob([resp.data]))
+    const a = document.createElement("a")
+    a.href = blobUrl
+    a.download = (
+      type === "sales-register" ? "Sales_Register_2025.csv" :
+      type === "gstr1" ? "GSTR1_Data.csv" :
+      type === "payment-register" ? "Payment_Register.csv" :
+      type === "customer-master" ? "Customer_Master.csv" :
+      "Expense_Register.csv"
+    )
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(blobUrl)
+  }
+
   return (
     <Layout>
       <div className="space-y-6">
@@ -49,6 +73,31 @@ export default function Reports() {
           <div>Loading reports...</div>
         ) : (
           <>
+            <div className="bg-white p-6 rounded-lg shadow-lg">
+              <h2 className="text-xl font-bold mb-4">Analytics Filters</h2>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <label className="text-sm font-medium">Start Date</label>
+                  <input type="date" value={filters.start} onChange={(e) => setFilters({ ...filters, start: e.target.value })} className="w-full px-4 py-2 border rounded-lg" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">End Date</label>
+                  <input type="date" value={filters.end} onChange={(e) => setFilters({ ...filters, end: e.target.value })} className="w-full px-4 py-2 border rounded-lg" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Branch ID (optional)</label>
+                  <input type="number" value={filters.branch} onChange={(e) => setFilters({ ...filters, branch: e.target.value })} className="w-full px-4 py-2 border rounded-lg" />
+                </div>
+                <div className="flex items-end gap-2">
+                  <button onClick={() => exportCSV("sales-register")} className="px-4 py-2 bg-blue-600 text-white rounded-lg">Export Sales Register</button>
+                  <button onClick={() => exportCSV("gstr1")} className="px-4 py-2 bg-green-600 text-white rounded-lg">Export GSTR-1</button>
+                  <button onClick={() => exportCSV("payment-register")} className="px-4 py-2 bg-purple-600 text-white rounded-lg">Export Payments</button>
+                  <button onClick={() => exportCSV("customer-master")} className="px-4 py-2 bg-orange-600 text-white rounded-lg">Export Customer Master</button>
+                  <button onClick={() => exportCSV("expense-register")} className="px-4 py-2 bg-indigo-600 text-white rounded-lg">Export Expenses</button>
+                </div>
+              </div>
+            </div>
+
             {/* Sales Summary */}
             <div className="bg-white p-6 rounded-lg shadow-lg">
               <h2 className="text-xl font-bold mb-4 flex items-center gap-2">

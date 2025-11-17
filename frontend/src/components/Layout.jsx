@@ -6,19 +6,22 @@ import { LogOut, Menu, X } from "lucide-react"
 import { useState } from "react"
 
 export default function Layout({ children }) {
-  const { logout } = useAuth()
+  const { logout, user, effectiveRole } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
 
-  const menuItems = [
+  const role = effectiveRole || user?.role || "accountant"
+  const baseItems = [
     { path: "/dashboard", label: "Dashboard" },
     { path: "/customers", label: "Customers" },
     { path: "/products", label: "Products" },
     { path: "/invoices", label: "Invoices" },
-    { path: "/expenses", label: "Expenses" },
-    { path: "/reports", label: "Reports" },
   ]
+  const accountantExtras = [{ path: "/payments", label: "Payments" }, { path: "/expenses", label: "Expenses" }, { path: "/tax", label: "Tax" }, { path: "/reports", label: "Reports" }, { path: "/profile", label: "Profile" }]
+  const adminExtras = [{ path: "/payments", label: "Payments" }, { path: "/expenses", label: "Expenses" }, { path: "/tax", label: "Tax" }, { path: "/reports", label: "Reports" }, { path: "/settings/backup", label: "Settings" }, { path: "/setup", label: "Organization Setup" }, { path: "/profile", label: "Profile" }]
+  const salesExtras = [{ path: "/payments", label: "Payments" }, { path: "/customers", label: "Customers" }, { path: "/profile", label: "Profile" }]
+  const menuItems = role === "admin" ? [...baseItems, ...adminExtras] : role === "sales" ? [...baseItems, ...salesExtras] : [...baseItems, ...accountantExtras]
 
   const handleLogout = () => {
     logout()

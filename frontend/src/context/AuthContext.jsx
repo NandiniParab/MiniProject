@@ -7,6 +7,7 @@ const AuthContext = createContext()
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [token, setToken] = useState(localStorage.getItem("token"))
+  const [sessionRole, setSessionRole] = useState(localStorage.getItem("sessionRole") || null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -21,6 +22,8 @@ export function AuthProvider({ children }) {
         localStorage.removeItem("token")
       }
     }
+    const savedSessionRole = localStorage.getItem("sessionRole")
+    if (savedSessionRole) setSessionRole(savedSessionRole)
     setLoading(false)
   }, [])
 
@@ -33,10 +36,20 @@ export function AuthProvider({ children }) {
   const logout = () => {
     setUser(null)
     setToken(null)
+    setSessionRole(null)
     localStorage.removeItem("token")
+    localStorage.removeItem("sessionRole")
   }
 
-  return <AuthContext.Provider value={{ user, token, loading, login, logout }}>{children}</AuthContext.Provider>
+  const effectiveRole = sessionRole || user?.role || null
+
+  const setRole = (role) => {
+    setSessionRole(role)
+    if (role) localStorage.setItem("sessionRole", role)
+    else localStorage.removeItem("sessionRole")
+  }
+
+  return <AuthContext.Provider value={{ user, token, loading, login, logout, sessionRole, setRole, effectiveRole }}>{children}</AuthContext.Provider>
 }
 
 export function useAuth() {

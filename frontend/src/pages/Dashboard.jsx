@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react"
 import Layout from "../components/Layout"
+import { useAuth } from "../context/AuthContext"
 import apiClient from "../components/ApiClient"
 import { BarChart3, Users, Package, FileText } from 'lucide-react'
 
 export default function Dashboard() {
+  const { user, effectiveRole } = useAuth()
   const [stats, setStats] = useState({
     invoices: 0,
     customers: 0,
@@ -67,39 +69,23 @@ export default function Dashboard() {
         <div className="bg-white p-6 rounded-lg shadow-lg">
           <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <a
-              href="/invoices"
-              className="p-4 bg-blue-50 hover:bg-blue-100 rounded-lg text-center font-semibold text-blue-600"
-            >
-              Create Invoice
-            </a>
-            <a
-              href="/customers"
-              className="p-4 bg-green-50 hover:bg-green-100 rounded-lg text-center font-semibold text-green-600"
-            >
-              Add Customer
-            </a>
-            <a
-              href="/products"
-              className="p-4 bg-purple-50 hover:bg-purple-100 rounded-lg text-center font-semibold text-purple-600"
-            >
-              Add Product
-            </a>
-            <a
-              href="/reports"
-              className="p-4 bg-orange-50 hover:bg-orange-100 rounded-lg text-center font-semibold text-orange-600"
-            >
-              View Reports
-            </a>
+            <a href="/invoices" className="p-4 bg-blue-50 hover:bg-blue-100 rounded-lg text-center font-semibold text-blue-600">Create Invoice</a>
+            {(effectiveRole || user?.role) !== "sales" && (
+              <a href="/customers" className="p-4 bg-green-50 hover:bg-green-100 rounded-lg text-center font-semibold text-green-600">Add Customer</a>
+            )}
+            {(effectiveRole || user?.role) !== "sales" && (
+              <a href="/products" className="p-4 bg-purple-50 hover:bg-purple-100 rounded-lg text-center font-semibold text-purple-600">Add Product</a>
+            )}
+            {(effectiveRole || user?.role) !== "sales" && (
+              <a href="/reports" className="p-4 bg-orange-50 hover:bg-orange-100 rounded-lg text-center font-semibold text-orange-600">View Reports</a>
+            )}
+            {(effectiveRole || user?.role) === "admin" && (
+              <a href="/setup" className="p-4 bg-slate-50 hover:bg-slate-100 rounded-lg text-center font-semibold text-slate-600">Organization Setup</a>
+            )}
           </div>
         </div>
 
-        <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-          <p className="text-sm text-yellow-800">
-            <strong>Note:</strong> The app is using mock data in preview mode. To connect to your real backend, run the
-            backend server at http://localhost:5000 and it will automatically connect.
-          </p>
-        </div>
+        
       </div>
     </Layout>
   )

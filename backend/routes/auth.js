@@ -2,6 +2,7 @@ import express from "express"
 import bcrypt from "bcryptjs"
 import pool from "../config/database.js"
 import { generateToken } from "../config/jwt.js"
+import { authMiddleware, roleCheck } from "../middleware/auth.js"
 
 const router = express.Router()
 
@@ -23,7 +24,7 @@ router.post("/register", async (req, res) => {
     )
 
     const userData = result.rows[0]
-    const token = generateToken(userData.id, userData.organization_id, userData.role)
+    const token = generateToken(userData.id, userData.organization_id, userData.role, userData.branch_id)
     res.status(201).json({ user: userData, token })
   } catch (error) {
     console.error("[v0] Register error:", error.message)
@@ -48,7 +49,7 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid email or password" })
     }
 
-    const token = generateToken(user.id, user.organization_id, user.role)
+    const token = generateToken(user.id, user.organization_id, user.role, user.branch_id)
     res.json({
       user: {
         id: user.id,
@@ -62,6 +63,25 @@ router.post("/login", async (req, res) => {
     })
   } catch (error) {
     console.error("[v0] Login error:", error.message)
+    res.status(500).json({ error: error.message })
+  }
+})
+
+// Update current user's organization/branch (admin only)
+router.put("/me/organization", authMiddleware, roleCheck(["admin"]), async (req, res) => {
+  const { organizationId, branchId } = req.body
+
+  try {
+    const updated = await pool.query(
+      `UPDATE users SET organization_id = $1, branch_id = $2 WHERE id = $3 RETURNING id, name, email, role, organization_id, branch_id`,
+      [organizationId, branchId || null, req.user.userId],
+    )
+
+    const userData = updated.rows[0]
+    const token = generateToken(userData.id, userData.organization_id, userData.role, userData.branch_id)
+    res.json({ user: userData, token })
+  } catch (error) {
+    console.error("[v0] Update org error:", error.message)
     res.status(500).json({ error: error.message })
   }
 })
