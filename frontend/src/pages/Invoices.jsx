@@ -729,6 +729,15 @@ export default function Invoices() {
                           <motion.button
                             whileHover={{ scale: 1.2 }}
                             whileTap={{ scale: 0.9 }}
+                            onClick={() => handleGeneratePDF(inv.id)}
+                            className="text-[#122C4F] hover:text-[#5B88B2] transition-colors"
+                            title="Download PDF"
+                          >
+                            <Download size={18} />
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.2 }}
+                            whileTap={{ scale: 0.9 }}
                             onClick={() => handleDelete(inv.id)}
                             className="text-red-500 hover:text-red-700 transition-colors"
                             title="Delete Invoice"

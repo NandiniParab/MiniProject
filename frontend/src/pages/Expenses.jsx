@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Layout from "../components/Layout"
+import InvoiceUploader from "../components/InvoiceUploader"
 import apiClient from "../components/ApiClient"
 import { Trash2 } from "lucide-react"
 import { motion } from "framer-motion"
@@ -11,6 +12,7 @@ export default function Expenses() {
   const [expenses, setExpenses] = useState([])
   const [purchaseBills, setPurchaseBills] = useState([])
   const [showForm, setShowForm] = useState(false)
+  const [showUploader, setShowUploader] = useState(false)
   const [loading, setLoading] = useState(true)
   const [formData, setFormData] = useState({
     category: "",
@@ -45,6 +47,28 @@ export default function Expenses() {
       setPurchaseBills(res.data)
     } catch (err) {
       console.error("Failed to fetch purchase bills", err)
+    }
+  }
+
+  const handleBillUploadSuccess = (result) => {
+    if (result && result.purchase_bill_id && result.journal_entry_draft) {
+      const d = result.journal_entry_draft
+      const taxSum = (Number(d.cgst_input) || 0) + (Number(d.sgst_input) || 0) + (Number(d.igst_input) || 0)
+      const baseAmt = Number(d.amount) || 0
+      const gstPercent = baseAmt > 0 ? (taxSum / baseAmt) * 100 : 0
+      setFormData({
+        category: d.entry_type === "purchase" ? "Purchases" : "Office Expense",
+        vendor_id: d.vendor_id ? String(d.vendor_id) : "",
+        vendor: "",
+        amount: String(d.total_amount || baseAmt),
+        gst_percent: String(Number(gstPercent.toFixed(2))),
+        expense_date: d.entry_date || new Date().toISOString().split("T")[0],
+        purchase_bill_id: String(result.purchase_bill_id),
+        notes: `Auto-filled from OCR bill #${d.reference_no || result.purchase_bill_id}`,
+      })
+      setShowForm(true)
+      setShowUploader(false)
+      fetchPurchaseBills()
     }
   }
 
@@ -98,15 +122,15 @@ export default function Expenses() {
             </div>
             Expenses
           </motion.h1>
-          <div className="flex items-center gap-3 flex-wrap">
-            <motion.a
-              href="/expenses/purchase-bills"
+        <div className="flex items-center gap-3 flex-wrap">
+            <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => setShowUploader(!showUploader)}
               className="flex items-center gap-2 px-6 py-3 bg-[#5B88B2] text-white font-semibold rounded-xl hover:shadow-lg transition-all"
             >
-              <FaFileInvoice size={18} /> Purchase Bills OCR
-            </motion.a>
+              <FaFileInvoice size={18} /> Upload Bill
+          </motion.button>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -115,8 +139,27 @@ export default function Expenses() {
             >
               <FaPlus size={18} /> Add Expense
             </motion.button>
-          </div>
         </div>
+      </div>
+
+        {showUploader && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-[#FBF9E3] p-6 rounded-2xl shadow-md border border-slate-200"
+          >
+            <h2 className="text-lg font-semibold text-[#122C4F] mb-4 flex items-center gap-2">
+              <FaFileInvoice className="text-[#5B88B2]" /> Upload Bill
+            </h2>
+            <div className="bg-white p-6 rounded-xl border-2 border-dashed border-[#5B88B2]/30 hover:border-[#5B88B2]/60 transition-colors">
+              <InvoiceUploader
+                onSuccess={handleBillUploadSuccess}
+                uploadUrl={"http://localhost:5000/api/purchase-bills/upload"}
+                fileFieldName={"bill_file"}
+              />
+            </div>
+          </motion.div>
+        )}
 
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -134,8 +177,8 @@ export default function Expenses() {
                   <th className="px-4 py-3 text-left font-semibold text-[#122C4F]">Bill #</th>
                   <th className="px-4 py-3 text-left font-semibold text-[#122C4F]">Date</th>
                   <th className="px-4 py-3 text-left font-semibold text-[#122C4F]">Vendor</th>
-                  <th className="px-4 py-3 text-right font-semibold text-[#122C4F]">Subtotal</th>
                   <th className="px-4 py-3 text-right font-semibold text-[#122C4F]">Tax</th>
+                  <th className="px-4 py-3 text-right font-semibold text-[#122C4F]">Subtotal</th>
                   <th className="px-4 py-3 text-right font-semibold text-[#122C4F]">Total</th>
                   <th className="px-4 py-3 text-left font-semibold text-[#122C4F]">Status</th>
                 </tr>

@@ -5,10 +5,15 @@ import os
 import cv2
 from PIL import Image
 import pytesseract
+# Configure Tesseract executable path (Windows default or env override)
+TESSERACT_EXE = os.environ.get("TESSERACT_EXE_PATH") or r"C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
+if os.path.exists(TESSERACT_EXE):
+    pytesseract.pytesseract.tesseract_cmd = TESSERACT_EXE
 
 try:
     from pdf2image import convert_from_path
     PDF_SUPPORT = True
+    POPPLER_PATH = os.environ.get("POPPLER_PATH")
 except:
     PDF_SUPPORT = False
 
@@ -97,7 +102,7 @@ if __name__ == "__main__":
 
     try:
         if ext == '.pdf' and PDF_SUPPORT:
-            images = convert_from_path(file_path, dpi=300)
+            images = convert_from_path(file_path, dpi=300, poppler_path=POPPLER_PATH) if POPPLER_PATH else convert_from_path(file_path, dpi=300)
             temp = "temp_page.jpg"
             images[0].save(temp, 'JPEG')
             text = ocr_image(temp)

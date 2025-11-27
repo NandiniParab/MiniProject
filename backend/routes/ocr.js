@@ -110,6 +110,13 @@ router.post("/extract-invoice", upload.single("invoice_image"), async (req, res)
         console.log(`[v0] Python exited with code ${code} in ${duration}ms`)
 
         if (code !== 0) {
+          const out = stdout.trim()
+          if (out) {
+            try {
+              const parsed = JSON.parse(out)
+              if (parsed && parsed.error) return reject(new Error(parsed.error))
+            } catch {}
+          }
           console.error("[v0] Python stderr:", stderr)
           return reject(new Error(`OCR failed (exit ${code}): ${stderr || 'No error output'}`))
         }

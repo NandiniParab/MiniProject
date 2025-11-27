@@ -12,11 +12,15 @@ import os
 import cv2
 import pytesseract
 from PIL import Image
+TESSERACT_EXE = os.environ.get("TESSERACT_EXE_PATH") or r"C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
+if os.path.exists(TESSERACT_EXE):
+    pytesseract.pytesseract.tesseract_cmd = TESSERACT_EXE
 
 # ---------- PDF support (optional) ----------
 try:
     from pdf2image import convert_from_path
     PDF_SUPPORT = True
+    POPPLER_PATH = os.environ.get("POPPLER_PATH")
 except Exception:          # ImportError or any other problem
     PDF_SUPPORT = False
 
@@ -136,7 +140,7 @@ def process_invoice_file(file_path: str, json_output_path: str | None = None) ->
     if ext == '.pdf':
         if not PDF_SUPPORT:
             raise ImportError("pdf2image not installed – cannot read PDF")
-        images = convert_from_path(file_path, dpi=300)
+        images = convert_from_path(file_path, dpi=300, poppler_path=POPPLER_PATH) if POPPLER_PATH else convert_from_path(file_path, dpi=300)
         tmp = file_path.replace('.pdf', '_tmp_page0.jpg')
         images[0].save(tmp, 'JPEG')
         text = image_to_text(tmp)

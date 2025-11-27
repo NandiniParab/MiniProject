@@ -57,7 +57,16 @@ router.post("/upload", upload.single("bill_file"), async (req, res) => {
       p.stderr.on("data", (d) => (err += d.toString()))
       p.on("close", (code) => {
         clearTimeout(t)
-        if (code !== 0) return reject(new Error(err || `Exit ${code}`))
+        if (code !== 0) {
+          const trimmed = out.trim()
+          if (trimmed) {
+            try {
+              const j = JSON.parse(trimmed)
+              if (j && j.error) return reject(new Error(j.error))
+            } catch {}
+          }
+          return reject(new Error(err || `Exit ${code}`))
+        }
         resolve(out.trim())
       })
       p.on("error", (e) => {

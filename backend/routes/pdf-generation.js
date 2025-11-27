@@ -38,36 +38,39 @@ router.post("/:invoiceId/generate-pdf", async (req, res) => {
     }
 
     const invoice = invoiceResult.rows[0]
-    const items = itemsResult.rows.map(item => ({
-      description: item.description || `Item`,
-      hsn: item.hsn_code || '',
-      qty: item.qty || item.quantity || 1,
-      unit_price: item.price || 0,
-      line_total: (item.qty || item.quantity || 1) * (item.price || 0),
-      gst_rate: item.applied_gst_rate || item.gst_rate || 0,
-      gst_amount: item.gst_amount || 0,
-      cgst: item.cgst_amount || 0,
-      sgst: item.sgst_amount || 0,
-      igst: item.igst_amount || 0
-    }))
-
-    // Prepare normalized invoice data for PDF generation
-    const normalizedInvoice = {
-      invoice_id: invoice.invoice_number,
-      invoice_date: invoice.issue_date,
-      customer_gstin: invoice.customer_gstin || '',
-      supplier_gstin: process.env.BUSINESS_GSTIN || '',
-      place_of_supply: invoice.place_of_supply || 'Unknown',
-      items: items,
-      taxable_total: parseFloat(invoice.taxable_value) || 0,
-      cgst: parseFloat(invoice.cgst_amount) || 0,
-      sgst: parseFloat(invoice.sgst_amount) || 0,
-      igst: parseFloat(invoice.igst_amount) || 0,
-      total_tax: (parseFloat(invoice.cgst_amount) || 0) + (parseFloat(invoice.sgst_amount) || 0) + (parseFloat(invoice.igst_amount) || 0),
-      grand_total: parseFloat(invoice.net_amount) || 0,
-      raw_extracted: {
-        'Customer Name': invoice.customer_name
+    const items = itemsResult.rows.map(item => {
+      const qty = item.qty || item.quantity || 1
+      const price = item.price || 0
+      const lineTotal = (qty * price) - (item.line_discount || 0)
+      const gstRate = item.applied_gst_rate || 0
+      const gstAmount = (lineTotal * gstRate) / 100
+      return {
+        'Item Name': item.description || 'Item',
+        'HSN/SAC Code': item.hsn_code || '',
+        'Quantity': qty,
+        'Unit Price': price,
+        'Line Total': lineTotal,
+        'GST Rate': gstRate,
+        'GST Amount': gstAmount
       }
+    })
+
+    // Build OCR-like structure expected by pdf_creation.py normaliser
+    const ocrData = {
+      'Invoice Number': invoice.invoice_number,
+      'Invoice Date': invoice.issue_date,
+      'Vendor Name': process.env.BUSINESS_NAME || 'Business',
+      'Vendor GSTIN': process.env.BUSINESS_GSTIN || '',
+      'Customer Name': invoice.customer_name || '',
+      'Customer GSTIN': invoice.customer_gstin || '',
+      'Customer Address': invoice.place_of_supply_state ? `State (${invoice.place_of_supply_state})` : '',
+      'Items': items,
+      'Taxable Amount': parseFloat(invoice.taxable_value) || 0,
+      'CGST Amount': parseFloat(invoice.cgst_amount) || 0,
+      'SGST Amount': parseFloat(invoice.sgst_amount) || 0,
+      'IGST Amount': parseFloat(invoice.igst_amount) || 0,
+      'Total Tax': ((parseFloat(invoice.cgst_amount) || 0) + (parseFloat(invoice.sgst_amount) || 0) + (parseFloat(invoice.igst_amount) || 0)),
+      'Total Amount': parseFloat(invoice.net_amount) || 0
     }
 
     const pdfDir = path.resolve(__dirname, "../pdfs")
@@ -84,7 +87,7 @@ router.post("/:invoiceId/generate-pdf", async (req, res) => {
     const tempJsonPath = path.join(tempDir, `invoice_${invoiceId}_${Date.now()}.json`)
 
     // Write JSON to temp file (Python script expects file path)
-    const invoiceJson = JSON.stringify(normalizedInvoice, null, 2)
+    const invoiceJson = JSON.stringify(ocrData, null, 2)
     fs.writeFileSync(tempJsonPath, invoiceJson, 'utf8')
 
     console.log("[v0] Calling PDF generation script...")
